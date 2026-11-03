@@ -87,7 +87,8 @@ export default function Home() {
 
   useEffect(() => { const t = setTimeout(load, 300); return () => clearTimeout(t); }, [load]); // debounce typing
 
-  const activeFilters = (filters.minPrice ? 1 : 0) + (filters.maxPrice ? 1 : 0) + filters.amenities.length + (filters.sort !== 'rating' ? 1 : 0);
+  const activeFilters = (filters.city.trim() ? 1 : 0) + (filters.minPrice ? 1 : 0) + (filters.maxPrice ? 1 : 0)
+    + filters.amenities.length + (filters.sort !== 'rating' ? 1 : 0);
   const confirmLogout = () => Alert.alert('Log out?', undefined, [{ text: 'Cancel' }, { text: 'Log out', onPress: logout }]);
 
   return (
@@ -113,7 +114,7 @@ export default function Home() {
         </View>
 
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Input icon="search" placeholder="Hotel, city or address" value={q} onChangeText={setQ}
+          <Input icon="search" placeholder="Search hotel name" value={q} onChangeText={setQ}
             returnKeyType="search" box={{ flex: 1, backgroundColor: theme.bg, borderColor: 'transparent' }} />
           <TouchableOpacity onPress={() => setShowFilter(true)} activeOpacity={0.8}
             style={{ width: 48, borderRadius: 12, backgroundColor: theme.primary, alignItems: 'center', justifyContent: 'center' }}>

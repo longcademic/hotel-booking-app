@@ -47,7 +47,7 @@ router.get('/hotels', wrap(async (req, res) => {
   const match = { isActive: true };
   if (q) {
     const rx = new RegExp(escapeRx(q), 'i');
-    match.$or = [{ name: rx }, { city: rx }, { address: rx }];
+    match.name = rx;
   }
   if (city) match.city = new RegExp(`^${escapeRx(city)}$`, 'i');
   if (amenities) match.amenities = { $all: toIds(amenities) };

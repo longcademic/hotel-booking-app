@@ -7,9 +7,10 @@ import { Amenity } from '../types';
 import { theme } from '../theme';
 import { Button, Chip, Input } from '../ui';
 
-export type Filters = { minPrice: string; maxPrice: string; sort: string; amenities: string[] };
-export const defaultFilters = (sort: string): Filters => ({ minPrice: '', maxPrice: '', sort, amenities: [] });
+export type Filters = { city: string; minPrice: string; maxPrice: string; sort: string; amenities: string[] };
+export const defaultFilters = (sort: string): Filters => ({ city: '', minPrice: '', maxPrice: '', sort, amenities: [] });
 export const toParams = (f: Filters) => ({
+  city: f.city.trim() || undefined,
   minPrice: f.minPrice || undefined,
   maxPrice: f.maxPrice || undefined,
   sort: f.sort,
@@ -56,6 +57,14 @@ export default function FilterModal({ visible, scope, sorts, value, onClose, onA
               <Chip key={s.value} label={s.label} active={draft.sort === s.value} onPress={() => setDraft({ ...draft, sort: s.value })} />
             ))}
           </View>
+
+          {scope === 'hotel' && (
+            <>
+              <Title>City</Title>
+              <Input icon="location-outline" placeholder="Enter a city" value={draft.city}
+                autoCapitalize="words" onChangeText={(city) => setDraft({ ...draft, city })} />
+            </>
+          )}
 
           <Title>Price per night</Title>
           <View style={{ flexDirection: 'row', gap: 10 }}>
