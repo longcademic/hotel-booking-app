@@ -37,6 +37,17 @@ router.get('/amenities', wrap(async (req, res) => {
   res.json(await Amenity.find(filter).sort('name'));
 }));
 
+router.get('/cities', wrap(async (_req, res) => {
+  const values = await Hotel.distinct('city', { isActive: true });
+  const cities = new Map();
+  values.forEach((value) => {
+    const city = String(value || '').trim();
+    const key = city.toLowerCase();
+    if (city && !cities.has(key)) cities.set(key, city);
+  });
+  res.json([...cities.values()].sort((a, b) => a.localeCompare(b)));
+}));
+
 // Hotel list: ?q=&city=&minPrice=&maxPrice=&guests=&amenities=id,id&sort=&checkIn=&checkOut=&page=&limit=
 router.get('/hotels', wrap(async (req, res) => {
   const { q, city, minPrice, maxPrice, guests, amenities, sort = 'rating' } = req.query;

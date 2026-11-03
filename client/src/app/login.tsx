@@ -13,6 +13,7 @@ export default function Login() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -45,11 +46,19 @@ export default function Login() {
 
         {isRegister && <Input icon="person-outline" placeholder="Full name" value={name} onChangeText={setName} />}
         <Input icon="mail-outline" placeholder="Email" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
-        <Input icon="lock-closed-outline" placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
+        <View style={{ position: 'relative' }}>
+          <Input icon="lock-closed-outline" placeholder="Password" secureTextEntry={!showPassword}
+            value={password} onChangeText={setPassword} box={{ paddingRight: 48 }} />
+          <TouchableOpacity onPress={() => setShowPassword((visible) => !visible)} hitSlop={8}
+            accessibilityRole="button" accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+            style={{ position: 'absolute', top: 0, right: 12, bottom: 0, width: 32, alignItems: 'center', justifyContent: 'center' }}>
+            <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={theme.muted} />
+          </TouchableOpacity>
+        </View>
         {error ? <Text style={{ color: theme.danger }}>{error}</Text> : null}
 
         <Button title={isRegister ? 'Create account' : 'Sign in'} loading={busy} onPress={submit} />
-        <TouchableOpacity onPress={() => { setIsRegister(!isRegister); setError(''); }} style={{ alignItems: 'center', padding: 8 }}>
+        <TouchableOpacity onPress={() => { setIsRegister(!isRegister); setError(''); setShowPassword(false); }} style={{ alignItems: 'center', padding: 8 }}>
           <Text style={{ color: theme.muted }}>
             {isRegister ? 'Already have an account? ' : 'New here? '}
             <Text style={{ color: theme.primary, fontWeight: '700' }}>{isRegister ? 'Sign in' : 'Create an account'}</Text>

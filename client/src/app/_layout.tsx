@@ -11,6 +11,7 @@ export default function RootLayout() {
           headerStyle: { backgroundColor: theme.card },
           headerTitleStyle: { fontWeight: '700', color: theme.text },
           headerTintColor: theme.primary,
+          headerBackButtonDisplayMode: 'minimal',
           headerShadowVisible: false,
           contentStyle: { backgroundColor: theme.bg },
         }} />

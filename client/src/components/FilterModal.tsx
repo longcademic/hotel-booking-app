@@ -31,11 +31,16 @@ export default function FilterModal({ visible, scope, sorts, value, onClose, onA
   const insets = useSafeAreaInsets();
   const [draft, setDraft] = useState(value);
   const [all, setAll] = useState<Amenity[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
 
   useEffect(() => { if (visible) setDraft(value); }, [visible]);
   useEffect(() => {
     api.get('/amenities', { params: { scope } }).then((r) => setAll(r.data)).catch(() => {});
   }, [scope]);
+  useEffect(() => {
+    if (!visible || scope !== 'hotel') return;
+    api.get<string[]>('/cities').then((r) => setCities(r.data)).catch(() => setCities([]));
+  }, [scope, visible]);
 
   const toggle = (id: string) =>
     setDraft((d) => ({ ...d, amenities: d.amenities.includes(id) ? d.amenities.filter((x) => x !== id) : [...d.amenities, id] }));
@@ -61,8 +66,13 @@ export default function FilterModal({ visible, scope, sorts, value, onClose, onA
           {scope === 'hotel' && (
             <>
               <Title>City</Title>
-              <Input icon="location-outline" placeholder="Enter a city" value={draft.city}
-                autoCapitalize="words" onChangeText={(city) => setDraft({ ...draft, city })} />
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                <Chip label="Any city" active={!draft.city} onPress={() => setDraft((d) => ({ ...d, city: '' }))} />
+                {cities.map((city) => (
+                  <Chip key={city} label={city} active={draft.city === city}
+                    onPress={() => setDraft((d) => ({ ...d, city: d.city === city ? '' : city }))} />
+                ))}
+              </View>
             </>
           )}
 
