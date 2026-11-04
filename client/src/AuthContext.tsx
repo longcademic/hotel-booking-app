@@ -2,12 +2,14 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { api } from './api';
 
-type User = { id: string; name: string; email: string; role: 'customer' | 'admin' };
+type User = { id: string; name: string; email: string; phone: string; role: 'customer' | 'admin' };
 type Ctx = {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, phone: string) => Promise<void>;
+  updateProfile: (name: string, phone: string) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -42,7 +44,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     loading,
     login: (email, password) => handle('/auth/login', { email, password }),
-    register: (name, email, password) => handle('/auth/register', { name, email, password }),
+    register: (name, email, password, phone) => handle('/auth/register', { name, email, password, phone }),
+    updateProfile: async (name, phone) => {
+      const { data } = await api.patch('/auth/me', { name, phone });
+      setUser(data.user);
+    },
+    changePassword: async (currentPassword, newPassword) => {
+      const { data } = await api.post('/auth/change-password', { currentPassword, newPassword });
+      if (data.token) await SecureStore.setItemAsync('token', data.token);
+    },
     logout: async () => {
       await SecureStore.deleteItemAsync('token');
       setUser(null);

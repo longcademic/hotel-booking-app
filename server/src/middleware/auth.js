@@ -9,8 +9,10 @@ exports.protect = async (req, res, next) => {
     if (!token) return res.status(401).json({ message: 'Not authenticated' });
 
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(payload.id);
+    const user = await User.findById(payload.id).select('+tokenVersion');
     if (!user || !user.isActive) return res.status(401).json({ message: 'Invalid account' });
+    if ((payload.tokenVersion ?? 0) !== (user.tokenVersion ?? 0))
+      return res.status(401).json({ message: 'Session expired, please sign in again' });
 
     req.user = user;
     next();

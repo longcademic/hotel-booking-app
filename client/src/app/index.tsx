@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -64,7 +64,7 @@ function HotelCard({ h, onPress }: { h: Hotel; onPress: () => void }) {
 export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const search = useSearch();
   const [q, setQ] = useState('');
   const [filters, setFilters] = useState<Filters>(defaultFilters('rating'));
@@ -89,8 +89,6 @@ export default function Home() {
 
   const activeFilters = (filters.city.trim() ? 1 : 0) + (filters.minPrice ? 1 : 0) + (filters.maxPrice ? 1 : 0)
     + filters.amenities.length + (filters.sort !== 'rating' ? 1 : 0);
-  const confirmLogout = () => Alert.alert('Log out?', undefined, [{ text: 'Cancel' }, { text: 'Log out', onPress: logout }]);
-
   return (
     <View style={{ flex: 1 }}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -98,8 +96,8 @@ export default function Home() {
       <View style={{ backgroundColor: theme.card, paddingTop: insets.top + 8, paddingHorizontal: 16, paddingBottom: 16,
         gap: 12, borderBottomLeftRadius: 24, borderBottomRightRadius: 24, ...shadow }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <View>
-            <Text style={{ color: theme.muted }}>{user ? `Hi, ${user.name.split(' ')[0]}` : 'Welcome'}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            {user && <HeaderIcon name="person-circle-outline" onPress={() => router.push('/profile' as any)} />}
             <Text style={{ fontSize: 24, fontWeight: '800', color: theme.text }}>Find your stay</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -107,7 +105,6 @@ export default function Home() {
               <>
                 <HeaderIcon name="receipt-outline" onPress={() => router.push('/bookings')} />
                 {user.role === 'admin' && <HeaderIcon name="shield-checkmark-outline" onPress={() => router.push('/admin')} />}
-                <HeaderIcon name="log-out-outline" onPress={confirmLogout} />
               </>
             ) : <Button title="Sign in" small onPress={() => router.push('/login')} />}
           </View>

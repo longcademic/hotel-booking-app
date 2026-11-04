@@ -12,6 +12,7 @@ export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -23,7 +24,7 @@ export default function Login() {
     if (isRegister && password.length < 6) return setError('Password must be at least 6 characters.');
     setBusy(true);
     try {
-      if (isRegister) await register(name.trim(), email.trim(), password);
+      if (isRegister) await register(name.trim(), email.trim(), password, phone.trim());
       else await login(email.trim(), password);
       router.canGoBack() ? router.back() : router.replace('/');
     } catch (e) { setError(errMsg(e)); }
@@ -46,6 +47,8 @@ export default function Login() {
 
         {isRegister && <Input icon="person-outline" placeholder="Full name" value={name} onChangeText={setName} />}
         <Input icon="mail-outline" placeholder="Email" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
+        {isRegister && <Input icon="call-outline" placeholder="Phone (optional)" keyboardType="phone-pad"
+          maxLength={30} value={phone} onChangeText={setPhone} />}
         <View style={{ position: 'relative' }}>
           <Input icon="lock-closed-outline" placeholder="Password" secureTextEntry={!showPassword}
             value={password} onChangeText={setPassword} box={{ paddingRight: 48 }} />
