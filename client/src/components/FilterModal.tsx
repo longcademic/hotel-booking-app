@@ -3,9 +3,10 @@ import { Modal, View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { api } from '../api';
-import { Amenity } from '../types';
 import { theme } from '../theme';
 import { Button, Chip, Input } from '../ui';
+import { Amenity } from '../types';
+import CityPicker from './CityPicker';
 
 export type Filters = { city: string; minPrice: string; maxPrice: string; sort: string; amenities: string[] };
 export const defaultFilters = (sort: string): Filters => ({ city: '', minPrice: '', maxPrice: '', sort, amenities: [] });
@@ -31,17 +32,11 @@ export default function FilterModal({ visible, scope, sorts, value, onClose, onA
   const insets = useSafeAreaInsets();
   const [draft, setDraft] = useState(value);
   const [all, setAll] = useState<Amenity[]>([]);
-  const [cities, setCities] = useState<string[]>([]);
 
   useEffect(() => { if (visible) setDraft(value); }, [visible]);
   useEffect(() => {
     api.get('/amenities', { params: { scope } }).then((r) => setAll(r.data)).catch(() => {});
   }, [scope]);
-  useEffect(() => {
-    if (!visible || scope !== 'hotel') return;
-    api.get<string[]>('/cities').then((r) => setCities(r.data)).catch(() => setCities([]));
-  }, [scope, visible]);
-
   const toggle = (id: string) =>
     setDraft((d) => ({ ...d, amenities: d.amenities.includes(id) ? d.amenities.filter((x) => x !== id) : [...d.amenities, id] }));
   const digits = (t: string) => t.replace(/\D/g, '');
@@ -66,13 +61,8 @@ export default function FilterModal({ visible, scope, sorts, value, onClose, onA
           {scope === 'hotel' && (
             <>
               <Title>City</Title>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                <Chip label="Any city" active={!draft.city} onPress={() => setDraft((d) => ({ ...d, city: '' }))} />
-                {cities.map((city) => (
-                  <Chip key={city} label={city} active={draft.city === city}
-                    onPress={() => setDraft((d) => ({ ...d, city: d.city === city ? '' : city }))} />
-                ))}
-              </View>
+              <CityPicker value={draft.city} allowAny variant="inline"
+                onChange={(city) => setDraft((d) => ({ ...d, city }))} />
             </>
           )}
 

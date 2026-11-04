@@ -73,7 +73,7 @@ export default function AdminDashboard() {
             <Kpi label="Reservations" value={k.reservations} sub="paid bookings" />
             <Kpi label="Average stay" value={k.avgNights === null ? '—' : `${k.avgNights} nights`} sub={`${k.completed} completed`} />
             <Kpi label="Net revenue" value={money(k.revenue)} sub="paid minus refunds" />
-            <Kpi label="Unpaid holds" value={k.pending} sub="awaiting payment" />
+            <Kpi label="Occupancy rate" value={`${k.occupancyRate}%`} sub="based on post-stay reviews" />
           </View>
           <Text style={{ color: theme.muted }}>
             {Object.entries(k.byStatus).map(([s, n]) => `${s} ${n}`).join(' · ') || 'No bookings in this period'}

@@ -6,6 +6,7 @@ import { useRequireAuth } from '../../useRequireAuth';
 import { Button, Card, EmptyState, Loader, SectionTitle, errMsg } from '../../ui';
 import { Field, Toggle } from '../../components/Field';
 import AmenityPicker from '../../components/AmenityPicker';
+import CityPicker from '../../components/CityPicker';
 
 export default function HotelForm() {
   const { user } = useRequireAuth();
@@ -64,7 +65,7 @@ export default function HotelForm() {
       <Card style={{ padding: 16, gap: 12 }}>
         <SectionTitle>Basics</SectionTitle>
         <Field label="Name" value={f.name} onChangeText={set('name')} />
-        <Field label="City" value={f.city} onChangeText={set('city')} />
+        <CityPicker label="City" value={f.city} onChange={set('city')} />
         <Field label="Address" value={f.address} onChangeText={set('address')} />
         <Field label="Phone" value={f.phone} onChangeText={set('phone')} keyboardType="phone-pad" />
         <Field label="Description" value={f.description} onChangeText={set('description')} multiline />

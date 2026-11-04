@@ -2,7 +2,9 @@ const router = require('express').Router();
 const mongoose = require('mongoose');
 const Booking = require('../models/Booking');
 const Hotel = require('../models/Hotel');
+const Room = require('../models/Room');
 const RoomType = require('../models/RoomType');
+const Review = require('../models/Review');
 const { wrap } = require('../utils/crud');
 const { DAY, todayUTC, tzOffsetMs } = require('../utils/availability');
 
@@ -28,7 +30,7 @@ router.get('/', wrap(async (req, res) => {
   const mostBookedBy = hotelId ? 'roomType' : 'hotel';
   const lookupFrom = hotelId ? RoomType.collection.name : Hotel.collection.name;
 
-  const [byStatusRows, paidRows, completedRows, confirmedRows, cancelledRows, mostRows] = await Promise.all([
+  const [byStatusRows, paidRows, completedRows, confirmedRows, cancelledRows, mostRows, roomCount, reviewedStays] = await Promise.all([
     Booking.aggregate([{ $match: created }, { $group: { _id: '$status', n: { $sum: 1 } } }]),
     Booking.aggregate([
       { $match: { ...created, paidAt: { $exists: true } } },
@@ -55,6 +57,19 @@ router.get('/', wrap(async (req, res) => {
       { $lookup: { from: lookupFrom, localField: '_id', foreignField: '_id', as: 'doc' } },
       { $project: { count: 1, name: { $arrayElemAt: ['$doc.name', 0] } } },
     ]),
+    Room.countDocuments(hotelMatch),
+    Review.aggregate([
+      { $match: hotelMatch },
+      { $lookup: { from: Booking.collection.name, localField: 'booking', foreignField: '_id', as: 'stay' } },
+      { $unwind: '$stay' },
+      { $match: {
+        'stay.status': 'completed',
+        'stay.checkIn': { $lt: end },
+        'stay.checkOut': { $gt: start },
+        ...(hotelId ? { 'stay.hotel': hotelId } : {}),
+      } },
+      { $project: { checkIn: '$stay.checkIn', checkOut: '$stay.checkOut' } },
+    ]),
   ]);
 
   const byStatus = Object.fromEntries(byStatusRows.map((r) => [r._id, r.n]));
@@ -65,6 +80,16 @@ router.get('/', wrap(async (req, res) => {
     return { date, confirmed: conf.get(date) || 0, cancelled: canc.get(date) || 0 };
   });
 
+  const reviewedRoomNights = reviewedStays.reduce((sum, stay) => {
+    const occupiedFrom = Math.max(new Date(stay.checkIn).getTime(), start.getTime());
+    const occupiedUntil = Math.min(new Date(stay.checkOut).getTime(), end.getTime());
+    return sum + Math.max(0, (occupiedUntil - occupiedFrom) / DAY);
+  }, 0);
+  const totalRoomNights = roomCount * days;
+  const occupancyRate = totalRoomNights
+    ? Math.min(100, Math.round((reviewedRoomNights / totalRoomNights) * 1000) / 10)
+    : 0;
+
   const paid = paidRows[0];
   res.json({
     days,
@@ -74,6 +99,7 @@ router.get('/', wrap(async (req, res) => {
       completed: byStatus.completed || 0,
       avgNights: completedRows[0] ? Math.round(completedRows[0].avg * 10) / 10 : null,
       pending: byStatus.pending || 0,
+      occupancyRate,
       byStatus,
     },
     trend,

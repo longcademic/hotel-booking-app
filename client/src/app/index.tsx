@@ -97,16 +97,14 @@ export default function Home() {
         gap: 12, borderBottomLeftRadius: 24, borderBottomRightRadius: 24, ...shadow }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            {user && <HeaderIcon name="person-circle-outline" onPress={() => router.push('/profile' as any)} />}
+            {user
+              ? <HeaderIcon name="person-circle-outline" onPress={() => router.push('/profile' as any)} />
+              : <Button title="Sign in" small onPress={() => router.push('/login')} />}
             <Text style={{ fontSize: 24, fontWeight: '800', color: theme.text }}>Find your stay</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            {user ? (
-              <>
-                <HeaderIcon name="receipt-outline" onPress={() => router.push('/bookings')} />
-                {user.role === 'admin' && <HeaderIcon name="shield-checkmark-outline" onPress={() => router.push('/admin')} />}
-              </>
-            ) : <Button title="Sign in" small onPress={() => router.push('/login')} />}
+            {user && <HeaderIcon name="receipt-outline" onPress={() => router.push('/bookings')} />}
+            {user?.role === 'admin' && <HeaderIcon name="shield-checkmark-outline" onPress={() => router.push('/admin')} />}
           </View>
         </View>
 

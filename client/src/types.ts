@@ -45,7 +45,7 @@ export type ReviewSummary = {
 
 export type AdminStats = {
   days: number;
-  kpi: { reservations: number; revenue: number; completed: number; avgNights: number | null; pending: number; byStatus: Record<string, number> };
+  kpi: { reservations: number; revenue: number; completed: number; avgNights: number | null; pending: number; occupancyRate: number; byStatus: Record<string, number> };
   trend: { date: string; confirmed: number; cancelled: number }[];
   mostBooked: { by: 'hotel' | 'roomType'; items: { _id: string; name: string; count: number }[] };
 };
